@@ -1,6 +1,7 @@
-
+import dotenv from 'dotenv'
 import { MongoClient,ServerApiVersion } from "mongodb";
-const url='mongodb+srv://muqaddasmalik781:Muqaddas%40123@cluster0.z6qf6.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
+dotenv.config()
+const url=process.env.MONGODBURI
 
 
 const mongoose= new MongoClient(url,{
