@@ -1,0 +1,41 @@
+{
+  "name": "sugsms",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "start": "node index"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Muqaddas12/sugsms.git"
+  },
+  "keywords": [
+    "sugsms",
+    "shobhituniversity",
+    "sug"
+  ],
+  "author": "muqaddas",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Muqaddas12/sugsms/issues"
+  },
+  "homepage": "https://github.com/Muqaddas12/sugsms#readme",
+  "description": "",
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "firebase-admin": "^13.3.0",
+    "firebase-functions": "^6.3.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.13.0",
+    "mongoose": "^8.9.6",
+    "multer": "^1.4.5-lts.1",
+    "nodemon": "^3.1.9"
+  }
+}

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+  <!-- Navbar -->
+  <nav class="border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+    <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+      <a href="#" class="flex items-center space-x-3 rtl:space-x-reverse">
+        <img src="https://flowbite.com/docs/images/logo.svg" class="h-8" alt="Flowbite Logo" />
+        <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Sugsms</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Content Wrapper -->
+  <div class="flex min-h-screen">
+
+    <!-- Sidebar -->
+    <div class="w-64 bg-gray-800 text-white p-4">
+      <ul>
+        <li class="mb-2 hover:bg-gray-700 p-2 rounded cursor-pointer">
+          <a href="/admin/homepage" class="block">Dashboard</a>
+        </li>
+        <li class="mb-2 hover:bg-gray-700 p-2 rounded cursor-pointer">
+          <a href="/admin/applications" class="block">Applications</a>
+        </li>
+        <li class="mb-2 hover:bg-gray-700 p-2 rounded cursor-pointer">
+          <a href="/admin/upload" class="block">Upload</a>
+        </li>
+        <li class="mb-2 hover:bg-gray-700 p-2 rounded cursor-pointer">
+          <a href="/admin/logout" class="block">Logout</a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-grow bg-gray-100 p-6">
+      <!-- Dashboard Header -->
+      <h1 class="text-3xl font-bold mb-6">Dashboard</h1>
+      <p class="mb-4">Welcome, <%= email %>! Here are the current stats for the applications:</p>
+
+      <!-- Application Status Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        <!-- Total Applications -->
+        <a href="/admin/applications" class="p-6 bg-white rounded shadow hover:bg-gray-100">
+          <h2 class="text-lg font-semibold">Total Applications</h2>
+          <p class="text-2xl font-bold text-blue-600"><%= total %></p>
+        </a>
+
+        <!-- Pending Applications -->
+        <a href="/admin/applications?status=pending" class="p-6 bg-white rounded shadow hover:bg-gray-100">
+          <h2 class="text-lg font-semibold">Pending Applications</h2>
+          <p class="text-2xl font-bold text-yellow-500"><%= pending %></p>
+        </a>
+
+        <!-- Accepted Applications -->
+        <a href="/admin/applications?status=accepted" class="p-6 bg-white rounded shadow hover:bg-gray-100">
+          <h2 class="text-lg font-semibold">Accepted Applications</h2>
+          <p class="text-2xl font-bold text-green-600"><%= accepted %></p>
+        </a>
+
+        <!-- Rejected Applications -->
+        <a href="/admin/applications?status=rejected" class="p-6 bg-white rounded shadow hover:bg-gray-100">
+          <h2 class="text-lg font-semibold">Rejected Applications</h2>
+          <p class="text-2xl font-bold text-red-600"><%= rejected %></p>
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>

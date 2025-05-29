@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Applications</title>
+  <script>
+  // Confirm before submitting accept/reject form
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('form[action*="/accept"], form[action*="/reject"]').forEach(form => {
+      form.addEventListener('submit', (e) => {
+        const actionType = form.action.includes('accept') ? 'accept' : 'reject';
+        const confirmed = confirm(`Are you sure you want to ${actionType} this application?`);
+        if (!confirmed) {
+          e.preventDefault();
+        }
+      });
+    });
+  });
+</script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <nav class="border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+    <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+      <a href="#" class="flex items-center space-x-3 rtl:space-x-reverse">
+        <img src="https://flowbite.com/docs/images/logo.svg" class="h-8" alt="Flowbite Logo" />
+        <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Sugsms</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Content Wrapper -->
+  <div class="flex flex-grow">
+
+    <!-- Sidebar -->
+    <div class="w-64 bg-gray-800 text-white p-4">
+      <ul>
+        <li class="mb-2 hover:bg-gray-700 p-2 rounded cursor-pointer">
+          <a href="/admin/homepage" class="block">Dashboard</a>
+        </li>
+        <li class="mb-2 hover:bg-gray-700 p-2 rounded cursor-pointer">
+          <a href="/admin/applications" class="block">Applications</a>
+        </li>
+        <li class="mb-2 hover:bg-gray-700 p-2 rounded cursor-pointer">
+          <a href="/admin/upload" class="block">Upload</a>
+        </li>
+        <li class="mb-2 hover:bg-gray-700 p-2 rounded cursor-pointer">
+          <a href="/admin/logout" class="block">Logout</a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-grow bg-gray-100 p-6">
+
+      <!-- Application Status Buttons -->
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Applications</h1>
+        <div class="space-x-4">
+          <a href="/admin/applications?status=pending">
+            <button class="px-4 py-2 rounded transition 
+              <%= currentStatus === 'pending' ? 'bg-yellow-600 text-white' : 'bg-yellow-500 text-white hover:bg-yellow-600' %>">
+              Pending Applications
+            </button>
+          </a>
+          <a href="/admin/applications?status=accepted">
+            <button class="px-4 py-2 rounded transition 
+              <%= currentStatus === 'accepted' ? 'bg-green-700 text-white' : 'bg-green-600 text-white hover:bg-green-700' %>">
+              Accepted Applications
+            </button>
+          </a>
+          <a href="/admin/applications?status=rejected">
+            <button class="px-4 py-2 rounded transition 
+              <%= currentStatus === 'rejected' ? 'bg-red-700 text-white' : 'bg-red-600 text-white hover:bg-red-700' %>">
+              Rejected Applications
+            </button>
+          </a>
+          <a href="/admin/applications">
+            <button class="px-4 py-2 rounded transition 
+              <%= currentStatus === 'all' ? 'bg-gray-700 text-white' : 'bg-gray-500 text-white hover:bg-gray-700' %>">
+              All Applications
+            </button>
+          </a>
+        </div>
+      </div>
+
+      <!-- Applications List -->
+      <div class="bg-white p-4 rounded shadow-md">
+        <div class="space-y-4">
+          <% if (applications.length === 0) { %>
+            <p class="text-gray-600">No applications found.</p>
+          <% } else { %>
+           <% applications.forEach(app => { %>
+ <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-gray-50 rounded shadow-md hover:bg-gray-100 space-y-4 sm:space-y-0">
+
+    <div class="flex-grow">
+      <p><strong>Name:</strong> <%= app.studentName %></p>
+      <p><strong>Roll Number:</strong> <%= app.rollNumber %></p>
+      <p><strong>Course:</strong> <%= app.course %></p>
+      <p><strong>Graduation Year:</strong> <%= app.graduationYear %></p>
+      <p><strong>Department:</strong> <%= app.department %></p>
+      <p>
+        <strong>File:</strong> 
+        <a href="/<%= app.file.path %>" target="_blank" class="text-blue-600 underline">
+          View PDF
+        </a>
+      </p>
+    </div>
+   <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-2 space-y-2 sm:space-y-0">
+<div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0">
+  <span class="text-sm text-gray-600">Status: <%= app.status.charAt(0).toUpperCase() + app.status.slice(1) %></span>
+  <!-- Buttons go here -->
+</div>
+
+
+      <% if (app.status === 'pending') { %>
+        <form method="POST" action="/admin/applications/<%= app._id %>/accept">
+          <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Accept</button>
+        </form>
+        <form method="POST" action="/admin/applications/<%= app._id %>/reject">
+          <button class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition">Reject</button>
+        </form>
+      <% } else if (app.status === 'accepted') { %>
+        <!-- Show only "Reject" button if accepted -->
+        <form method="POST" action="/admin/applications/<%= app._id %>/reject">
+          <button class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition">Reject</button>
+        </form>
+      <% } else if (app.status === 'rejected') { %>
+        <!-- Show only "Accept" button if rejected -->
+        <form method="POST" action="/admin/applications/<%= app._id %>/accept">
+          <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Accept</button>
+        </form>
+      <% } %>
+
+    </div>
+  </div>
+<% }) %>
+
+          <% } %>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>
