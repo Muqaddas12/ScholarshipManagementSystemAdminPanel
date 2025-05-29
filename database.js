@@ -4,7 +4,7 @@ dotenv.config()
 const url=process.env.MONGODBURI
 
 
-const mongoose= new MongoClient(url,{
+const mongoose= new MongoClient(url,{  
     serverApi:{
         version:ServerApiVersion.v1,
         strict:true,
