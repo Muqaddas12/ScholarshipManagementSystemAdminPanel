@@ -9,6 +9,8 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+import { ObjectId } from "mongodb";
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'uploads/'); // Make sure this folder exists
@@ -156,20 +158,22 @@ adminRoute.post('/upload', async (req, res, next) => {
 adminRoute.get('/upload',(req,res)=>{
   return res.render('UploadApplication',{title:'uploadapplication'})
 })
-
-adminRoute.get('/applications',verifyToken, async (req, res) => {
-  const status = req.query.status; // "pending", "accepted", or "rejected"
+adminRoute.get('/applications', verifyToken, async (req, res) => {
+  const status = req.query.status; // "pending", "accepted", "rejected", or "deleted"
 
   try {
     await connect();
     const db = getDb();
+    const collection = db.collection('StudentsApplications');
 
-    const filter = status ? { status } : {}; // Filter only if status is provided
-    const applications = await db.collection('StudentsApplications').find(filter).toArray();
+    // Apply filter if status is passed, otherwise get all
+    const filter = status ? { status } : {}; 
+    const applications = await collection.find(filter).toArray();
 
     return res.render('applications', {
       title: 'User Applications',
       applications,
+      deletedApplications: [], // No need to handle separately
       currentStatus: status || 'all'
     });
 
@@ -180,7 +184,8 @@ adminRoute.get('/applications',verifyToken, async (req, res) => {
     await disconnect();
   }
 });
-import { ObjectId } from "mongodb";
+
+
 
 // Accept application
 adminRoute.post('/applications/:id/accept', async (req, res) => {
@@ -241,7 +246,41 @@ console.log(student)
   } finally {
     await disconnect();
   }
+});// Delete application (Soft Delete)
+// Soft Delete application
+adminRoute.post('/applications/:id/delete', async (req, res) => {
+  try {
+    await connect();
+    const db = getDb();
+    const appId = new ObjectId(req.params.id);
+
+    const application = await db.collection('StudentsApplications').findOne({ _id: appId });
+
+    if (!application) {
+      return res.redirect('/admin/applications?msg=' + encodeURIComponent('Application not found.'));
+    }
+
+    // Do NOT delete file — just mark as deleted
+    await db.collection('StudentsApplications').updateOne(
+      { _id: appId },
+      {
+        $set: {
+          status: 'deleted',
+          deleted: true
+        }
+      }
+    );
+
+    res.redirect('/admin/applications?msg=' + encodeURIComponent('Application marked as deleted.'));
+  } catch (error) {
+    console.error('Error deleting application:', error);
+    res.redirect('/admin/applications?msg=' + encodeURIComponent('Internal error during deletion.'));
+  } finally {
+    await disconnect();
+  }
 });
+
+
 
 
 export default adminRoute;
