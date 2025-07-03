@@ -30,7 +30,7 @@ server.use('/login', authRoute);
 server.use('/admin', adminRoute);
 
 
-// server.listen(3000,()=>{
-//     console.log('server is running')
-// })
-export default server
+server.listen(3000,()=>{
+    console.log('server is running')
+})
+// export default server
