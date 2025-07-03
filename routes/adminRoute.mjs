@@ -280,6 +280,35 @@ adminRoute.post('/applications/:id/delete', async (req, res) => {
   }
 });
 
+// Revert deleted application to pending
+adminRoute.post('/applications/:id/revert', async (req, res) => {
+  try {
+    await connect();
+    const db = getDb();
+    const appId = new ObjectId(req.params.id);
+
+    const result = await db.collection('StudentsApplications').updateOne(
+      { _id: appId },
+      {
+        $set: {
+          status: 'pending',
+          deleted: false
+        }
+      }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.redirect('/admin/applications?status=deleted&msg=' + encodeURIComponent('Application not found.'));
+    }
+
+    res.redirect('/admin/applications?status=deleted&msg=' + encodeURIComponent('Application reverted to pending.'));
+  } catch (error) {
+    console.error('Error reverting application:', error);
+    res.redirect('/admin/applications?status=deleted&error=' + encodeURIComponent('Error reverting application.'));
+  } finally {
+    await disconnect();
+  }
+});
 
 
 

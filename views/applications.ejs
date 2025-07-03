@@ -7,24 +7,22 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Confirm on submit
-      document.querySelectorAll('form[action*="/accept"], form[action*="/reject"], form[action*="/delete"]').forEach(form => {
+      document.querySelectorAll('form[action*="/accept"], form[action*="/reject"], form[action*="/delete"], form[action*="/revert"]').forEach(form => {
         form.addEventListener('submit', (e) => {
           const action = form.action.includes('accept') ? 'accept' :
-                         form.action.includes('reject') ? 'reject' : 'delete';
+                         form.action.includes('reject') ? 'reject' :
+                         form.action.includes('revert') ? 'revert' : 'delete';
           const confirmed = confirm(`Are you sure you want to ${action} this application?`);
           if (!confirmed) e.preventDefault();
         });
       });
 
-      // Mobile menu toggle
       const toggleBtn = document.getElementById("menu-toggle");
       const menu = document.getElementById("mobile-menu");
       toggleBtn?.addEventListener("click", () => {
         menu.classList.toggle("hidden");
       });
 
-      // Show alert if ?msg= or ?error= in URL
       const params = new URLSearchParams(window.location.search);
       const msg = params.get('msg');
       const err = params.get('error');
@@ -50,13 +48,10 @@
       </div>
       <button id="menu-toggle" class="md:hidden focus:outline-none">
         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M4 6h16M4 12h16M4 18h16" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
     </div>
-
-    <!-- Mobile Menu -->
     <div id="mobile-menu" class="md:hidden hidden bg-gray-700 px-4 pb-4 space-y-2">
       <a href="/admin/homepage" class="block text-white hover:text-gray-300">Dashboard</a>
       <a href="/admin/applications" class="block text-white hover:text-gray-300">Applications</a>
@@ -90,7 +85,7 @@
       </div>
     </div>
 
-    <!-- Active Applications -->
+    <!-- Applications List -->
     <div class="space-y-4">
       <% if (applications.length === 0) { %>
         <p class="text-gray-600">No applications found.</p>
@@ -107,49 +102,46 @@
             </div>
             <div class="flex flex-col lg:flex-row gap-2 items-start lg:items-center">
               <span class="text-gray-700">Status: <%= app.status.charAt(0).toUpperCase() + app.status.slice(1) %></span>
-              <% if (app.status === 'pending') { %>
+
+              <% if (currentStatus === 'pending') { %>
                 <form method="POST" action="/admin/applications/<%= app._id %>/accept">
                   <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Accept</button>
                 </form>
                 <form method="POST" action="/admin/applications/<%= app._id %>/reject">
                   <button class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Reject</button>
                 </form>
-              <% } else if (app.status === 'accepted') { %>
+
+              <% } else if (currentStatus === 'accepted') { %>
                 <form method="POST" action="/admin/applications/<%= app._id %>/reject">
                   <button class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Reject</button>
                 </form>
-              <% } else if (app.status === 'rejected') { %>
+                <form method="POST" action="/admin/applications/<%= app._id %>/delete">
+                  <button class="px-4 py-2 bg-gray-700 text-white rounded hover:bg-black">Delete</button>
+                </form>
+                <form method="POST" action="/admin/applications/<%= app._id %>/revert">
+                  <button class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">Revert to Pending</button>
+                </form>
+
+              <% } else if (currentStatus === 'rejected') { %>
                 <form method="POST" action="/admin/applications/<%= app._id %>/accept">
                   <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Accept</button>
                 </form>
+                <form method="POST" action="/admin/applications/<%= app._id %>/revert">
+                  <button class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">Revert to Pending</button>
+                </form>
+
+              <% } else if (currentStatus === 'deleted') { %>
+                <form method="POST" action="/admin/applications/<%= app._id %>/revert">
+                  <button class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">Revert to Pending</button>
+                </form>
+
               <% } %>
-              <form method="POST" action="/admin/applications/<%= app._id %>/delete">
-                <button class="px-4 py-2 bg-gray-700 text-white rounded hover:bg-black">Delete</button>
-              </form>
             </div>
           </div>
         <% }) %>
       <% } %>
     </div>
 
-    <!-- Deleted Applications Section -->
-    <% if (deletedApplications && deletedApplications.length > 0 && currentStatus !== 'deleted') { %>
-      <hr class="my-8 border-t">
-      <h2 class="text-xl font-semibold mb-4">Recently Deleted Applications</h2>
-      <div class="space-y-4">
-        <% deletedApplications.forEach(app => { %>
-          <div class="bg-red-100 p-4 rounded shadow">
-            <p><strong>Name:</strong> <%= app.studentName %></p>
-            <p><strong>Roll Number:</strong> <%= app.rollNumber %></p>
-            <p><strong>Status:</strong> Deleted</p>
-            <p><strong>File:</strong> <a href="/<%= app.file.path %>" target="_blank" class="text-red-600 underline">View PDF</a></p>
-          </div>
-        <% }) %>
-      </div>
-    <% } %>
-
   </main>
-
-
 </body>
 </html>
