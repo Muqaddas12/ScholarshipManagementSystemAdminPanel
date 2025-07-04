@@ -5,15 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title><%= title %></title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const toggleBtn = document.getElementById('menu-toggle');
-      const menu = document.getElementById('mobile-menu');
-      toggleBtn?.addEventListener('click', () => {
-        menu.classList.toggle('hidden');
-      });
-    });
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
 
@@ -32,13 +24,10 @@
       </nav>
       <button id="menu-toggle" class="md:hidden focus:outline-none">
         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M4 6h16M4 12h16M4 18h16" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
     </div>
-
-    <!-- Mobile Menu -->
     <div id="mobile-menu" class="md:hidden hidden bg-gray-700 px-4 pb-4 space-y-2">
       <a href="/admin/homepage" class="block text-white hover:text-gray-300">Dashboard</a>
       <a href="/admin/applications" class="block text-white hover:text-gray-300">Applications</a>
@@ -47,47 +36,143 @@
     </div>
   </header>
 
-  <!-- Main Content -->
+  <!-- Main -->
   <main class="flex-grow container mx-auto px-4 py-6">
-    <h1 class="text-3xl font-bold mb-4">Dashboard</h1>
-    <p class="mb-6 text-gray-700">Welcome, <%= email %>! Here are the current stats for the applications:</p>
+    <h1 class="text-3xl font-bold mb-6">Dashboard</h1>
+    <p class="mb-6 text-gray-700">Welcome, <%= email %>! You can search by roll number or view application stats:</p>
 
-    <!-- Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      <!-- Total Applications -->
-      <a href="/admin/applications" class="p-6 bg-white rounded shadow hover:bg-gray-100 transition-all">
-        <h2 class="text-lg font-semibold">Total Applications</h2>
-        <p class="text-2xl font-bold text-blue-600"><%= total %></p>
-      </a>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- Search Column -->
+      <div class="lg:col-span-1 space-y-4">
+        <form method="GET" action="/admin/homepage" class="space-y-4 bg-white p-4 rounded shadow">
+          <h2 class="text-lg font-semibold">Search by Roll Number</h2>
+          <input type="text" name="rollNumber" placeholder="Enter Roll Number"
+                 class="w-full px-4 py-2 border border-gray-300 rounded" required />
+          <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            Search
+          </button>
+        </form>
 
-      <!-- Pending Applications -->
-      <a href="/admin/applications?status=pending" class="p-6 bg-white rounded shadow hover:bg-gray-100 transition-all">
-        <h2 class="text-lg font-semibold">Pending Applications</h2>
-        <p class="text-2xl font-bold text-yellow-500"><%= pending %></p>
-      </a>
+        <% if (typeof searchPerformed !== 'undefined' && searchPerformed) { %>
+          <% if (searchResult) { %>
+            <div class="bg-white p-4 rounded shadow space-y-2">
+              <h2 class="text-lg font-semibold mb-2">Search Result</h2>
+              <p><strong>Name:</strong> <%= searchResult.studentName %></p>
+              <p><strong>Roll Number:</strong> <%= searchResult.rollNumber %></p>
+              <p><strong>Course:</strong> <%= searchResult.course %></p>
+              <p><strong>Graduation Year:</strong> <%= searchResult.graduationYear %></p>
+              <p><strong>Department:</strong> <%= searchResult.department %></p>
+              <p><strong>Status:</strong> <%= searchResult.status %></p>
+              <p><strong>File:</strong>
+                <a href="/<%= searchResult.file.path %>" target="_blank" class="text-blue-600 underline">View PDF</a>
+              </p>
 
-      <!-- Accepted Applications -->
-      <a href="/admin/applications?status=accepted" class="p-6 bg-white rounded shadow hover:bg-gray-100 transition-all">
-        <h2 class="text-lg font-semibold">Accepted Applications</h2>
-        <p class="text-2xl font-bold text-green-600"><%= accepted %></p>
-      </a>
+              <!-- Action Buttons -->
+              <div class="mt-4 flex flex-wrap gap-2">
+                <% if (searchResult.status === 'pending') { %>
+                  <form method="POST" action="/admin/applications/<%= searchResult._id %>/accept">
+                    <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 w-full sm:w-auto">Accept</button>
+                  </form>
+                  <form method="POST" action="/admin/applications/<%= searchResult._id %>/reject">
+                    <button class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 w-full sm:w-auto">Reject</button>
+                  </form>
+                <% } else if (searchResult.status === 'accepted') { %>
+                  <form method="POST" action="/admin/applications/<%= searchResult._id %>/reject">
+                    <button class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 w-full sm:w-auto">Reject</button>
+                  </form>
+                  <form method="POST" action="/admin/applications/<%= searchResult._id %>/delete">
+                    <button class="px-4 py-2 bg-gray-700 text-white rounded hover:bg-black w-full sm:w-auto">Delete</button>
+                  </form>
+                  <form method="POST" action="/admin/applications/<%= searchResult._id %>/revert">
+                    <button class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 w-full sm:w-auto">Revert</button>
+                  </form>
+                <% } else if (searchResult.status === 'rejected') { %>
+                  <form method="POST" action="/admin/applications/<%= searchResult._id %>/accept">
+                    <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 w-full sm:w-auto">Accept</button>
+                  </form>
+                  <form method="POST" action="/admin/applications/<%= searchResult._id %>/revert">
+                    <button class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 w-full sm:w-auto">Revert</button>
+                  </form>
+                <% } else if (searchResult.status === 'deleted') { %>
+                  <form method="POST" action="/admin/applications/<%= searchResult._id %>/revert">
+                    <button class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 w-full sm:w-auto">Revert</button>
+                  </form>
+                <% } %>
+              </div>
+            </div>
+          <% } else { %>
+            <div class="bg-red-100 text-red-700 px-4 py-2 rounded shadow">
+              No application found for the given Roll Number.
+            </div>
+          <% } %>
+        <% } %>
+      </div>
 
-      <!-- Rejected Applications -->
-      <a href="/admin/applications?status=rejected" class="p-6 bg-white rounded shadow hover:bg-gray-100 transition-all">
-        <h2 class="text-lg font-semibold">Rejected Applications</h2>
-        <p class="text-2xl font-bold text-red-600"><%= rejected %></p>
-      </a>
+      <!-- Stats + Graph Column -->
+      <div class="lg:col-span-2 space-y-6">
+        <div class="bg-white p-6 rounded shadow">
+          <h2 class="text-lg font-semibold mb-4">Application Status Overview</h2>
+          <canvas id="applicationChart" width="400" height="200"></canvas>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <a href="/admin/applications" class="p-6 bg-white rounded shadow hover:bg-gray-100 transition-all">
+            <h2 class="text-lg font-semibold">Total Applications</h2>
+            <p class="text-2xl font-bold text-blue-600"><%= total %></p>
+          </a>
+
+          <a href="/admin/applications?status=pending" class="p-6 bg-white rounded shadow hover:bg-gray-100 transition-all">
+            <h2 class="text-lg font-semibold">Pending Applications</h2>
+            <p class="text-2xl font-bold text-yellow-500"><%= pending %></p>
+          </a>
+
+          <a href="/admin/applications?status=accepted" class="p-6 bg-white rounded shadow hover:bg-gray-100 transition-all">
+            <h2 class="text-lg font-semibold">Accepted Applications</h2>
+            <p class="text-2xl font-bold text-green-600"><%= accepted %></p>
+          </a>
+
+          <a href="/admin/applications?status=rejected" class="p-6 bg-white rounded shadow hover:bg-gray-100 transition-all">
+            <h2 class="text-lg font-semibold">Rejected Applications</h2>
+            <p class="text-2xl font-bold text-red-600"><%= rejected %></p>
+          </a>
+        </div>
+      </div>
     </div>
   </main>
 
+  <!-- Chart Script -->
   <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const params = new URLSearchParams(window.location.search);
-    const msg = params.get('msg');
-    if (msg) {
-      alert(decodeURIComponent(msg));
-    }
-  });
-</script>
+    const ctx = document.getElementById('applicationChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Total', 'Pending', 'Accepted', 'Rejected'],
+        datasets: [{
+          label: 'Applications Count',
+          data: [<%= total %>, <%= pending %>, <%= accepted %>, <%= rejected %>],
+          backgroundColor: ['#3B82F6', '#FACC15', '#10B981', '#EF4444'],
+          borderRadius: 8,
+          borderSkipped: false
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: { enabled: true }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              precision: 0,
+              stepSize: 1
+            }
+          }
+        }
+      }
+    });
+  </script>
 </body>
 </html>

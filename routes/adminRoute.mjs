@@ -34,29 +34,41 @@ const upload = multer({ storage, fileFilter });
 adminRoute.get('/homepage', verifyToken, async (req, res) => {
   try {
     const email = req.user.email;
-      await connect();
+    await connect();
     const db = getDb();
-
-const collection = await db.collection('StudentsApplications')
+    const collection = db.collection('StudentsApplications');
 
     const total = await collection.countDocuments();
     const pending = await collection.countDocuments({ status: 'pending' });
     const accepted = await collection.countDocuments({ status: 'accepted' });
     const rejected = await collection.countDocuments({ status: 'rejected' });
-console.log(pending,accepted,rejected)
+
+    let searchResult = null;
+    let searchPerformed = false;
+
+    const rollNumber = req.query.rollNumber?.trim();
+
+    if (rollNumber) {
+      searchPerformed = true;
+      searchResult = await collection.findOne({ rollNumber });
+    }
+
     res.render('Homepage', {
       title: 'Homepage',
       email,
       total,
       pending,
       accepted,
-      rejected
+      rejected,
+      searchResult,
+      searchPerformed
     });
   } catch (err) {
-    console.error('Error fetching application counts:', err);
+    console.error('Error fetching dashboard data:', err);
     res.status(500).send('Internal Server Error');
   }
 });
+
 
 adminRoute.post('/upload', async (req, res, next) => {
   console.log('Upload request received');
