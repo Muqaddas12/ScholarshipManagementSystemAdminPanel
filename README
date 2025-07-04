@@ -1,0 +1,104 @@
+# 🎓 SUGSMS - Application Management System
+
+SUGSMS (Shobhit University Graduate Student Management System) is a web-based application to manage student applications. Admins can review, accept, reject, delete, and restore applications based on status filters.
+
+## ✨ Features
+
+* View all student applications with details
+* Filter applications by status:
+
+  * Pending
+  * Accepted
+  * Rejected
+  * Deleted
+* Perform actions:
+
+  * ✅ Accept application
+  * ❌ Reject application
+  * 🗑️ Soft delete application
+  * 🔁 Revert to pending status
+* Mobile responsive layout
+* Alert confirmations for all critical actions
+
+## 🛠 Tech Stack
+
+* **Backend**: Node.js, Express.js
+* **Templating Engine**: EJS
+* **Database**: MongoDB (Mongoose)
+* **Styling**: Tailwind CSS
+* **Deployment**: Any Node-compatible server (e.g. Render, Heroku)
+
+## 📁 Folder Structure
+
+```
+project-root/
+├── views/                   # EJS templates
+│   └── applications.ejs
+├── public/                  # Static files (CSS, JS, images)
+├── routes/                  # Express route handlers
+│   └── admin.js
+├── models/                  # Mongoose models
+│   └── Application.js
+├── app.js                   # Main Express app
+├── .env                     # Environment variables (Mongo URI, etc.)
+├── .gitignore
+└── README.md
+```
+
+## ✨ Setup Instructions
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/your-username/sugsms.git
+cd sugsms
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Configure environment
+
+Create a `.env` file in the root directory and add:
+
+```
+MONGODB_URI=your_mongodb_connection_string
+PORT=5000
+```
+
+### 4. Run the server
+
+```bash
+npm start
+```
+
+Visit `http://localhost:5000/admin/applications`
+
+## 🔐 Admin Routes Overview
+
+| Route                            | Method | Description                |
+| -------------------------------- | ------ | -------------------------- |
+| `/admin/applications`            | GET    | List all applications      |
+| `/admin/applications?status=...` | GET    | Filter by status           |
+| `/admin/applications/:id/accept` | POST   | Accept an application      |
+| `/admin/applications/:id/reject` | POST   | Reject an application      |
+| `/admin/applications/:id/delete` | POST   | Soft delete an application |
+| `/admin/applications/:id/revert` | POST   | Revert to pending          |
+
+## 📸 Screenshots
+
+> Add your screenshots here (e.g. dashboard view, actions)
+
+## 💡 Future Enhancements
+
+* ✅ Pagination and search
+* 📄 Export to CSV/PDF
+* 🔒 Role-based access (Admin, Super Admin)
+* 🪜 Permanent delete option
+
+## 📃 License
+
+This project is open source and available under the [MIT License](LICENSE).
